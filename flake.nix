@@ -409,18 +409,22 @@ EOF
     # Extract uv2nix dependencies from webrtcPythonSet (similar to rosUvDeps)
     webrtcUvDeps =
       let
+        # Safely try to get a package, returning empty list if it fails
+        tryGetPkg = name:
+          let
+            result = builtins.tryEval (
+              if webrtcPythonSet ? ${name} then webrtcPythonSet.${name} else null
+            );
+          in
+            if result.success && result.value != null then [result.value] else [];
+
         allPkgNames = builtins.attrNames webrtcPythonSet;
+        # Filter to packages that don't exist in base Python set
         depNames = builtins.filter (n:
-          n != "webrtc" &&
-          (builtins.tryEval webrtcPythonSet.${n}).success && (
-            !(pyProjectPythonBase ? ${n}) || (
-              (builtins.tryEval pyProjectPythonBase.${n}).success &&
-              webrtcPythonSet.${n} != pyProjectPythonBase.${n}
-            )
-          )
+          n != "webrtc" && !(pyProjectPythonBase ? ${n})
         ) allPkgNames;
       in
-        builtins.map (dep: webrtcPythonSet.${dep}) depNames;
+        builtins.concatMap tryGetPkg depNames;
 
     webrtcPkg = webrtcPythonSet.webrtc.overrideAttrs (old: {
       pname   = "webrtc";
