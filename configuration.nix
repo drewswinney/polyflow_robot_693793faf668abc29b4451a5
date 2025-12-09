@@ -298,15 +298,15 @@ let
 
           if [ "$state" = "inactive" ] || [ "$state" = "failed" ]; then
             echo "[wifi-mode] Service $svc is $state, starting instead of restarting" >&2
-            if systemctl start "$svc" 2>&1; then
-              echo "[wifi-mode] Successfully started $svc" >&2
+            if systemctl start --no-block "$svc" 2>&1; then
+              echo "[wifi-mode] Successfully queued start for $svc" >&2
             else
               echo "[wifi-mode] Warning: failed to start $svc" >&2
             fi
           else
             echo "[wifi-mode] Restarting $svc (current state: $state)" >&2
-            if systemctl restart "$svc" 2>&1; then
-              echo "[wifi-mode] Successfully restarted $svc" >&2
+            if systemctl restart --no-block "$svc" 2>&1; then
+              echo "[wifi-mode] Successfully queued restart for $svc" >&2
             else
               echo "[wifi-mode] Warning: failed to restart $svc" >&2
             fi
