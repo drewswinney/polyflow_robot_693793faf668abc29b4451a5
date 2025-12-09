@@ -178,6 +178,33 @@
         ''polyflow-ros: found ROS dirs ${lib.concatStringsSep ", " (lib.attrNames filtered)} under ${workspaceSrcPath}''
         filtered;
 
+    # Load native dependency overrides from each workspace package
+    rosNativeOverlays = lib.mapAttrsToList (name: _:
+      let
+        pkgPath = "${workspaceSrcPath}/${name}";
+        nativeDepsFile = "${pkgPath}/native-deps.nix";
+        hasNativeDeps = builtins.pathExists nativeDepsFile;
+      in
+        if hasNativeDeps then
+          let
+            # Load mapping: { python-pkg-name = [ "nixpkg1" "nixpkg2" ]; }
+            nativeDepsMap = import nativeDepsFile;
+          in
+            # Convert to overlay
+            (final: prev:
+              lib.attrsets.concatMapAttrs (pkgName: nixPkgNames:
+                lib.optionalAttrs (prev ? ${pkgName}) {
+                  ${pkgName} = prev.${pkgName}.overrideAttrs (old: {
+                    buildInputs = (old.buildInputs or []) ++ (map (n: pkgs.${n}) nixPkgNames);
+                    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.autoPatchelfHook ];
+                  });
+                }
+              ) nativeDepsMap
+            )
+        else
+          (final: prev: {})  # empty overlay
+    ) rosPackageDirs;
+
     # Create overlays for each ROS package with pyproject.toml
     rosWorkspaceOverlays = lib.mapAttrsToList (name: _:
       let
@@ -196,7 +223,9 @@
     # Create Python set with all ROS workspace dependencies
     rosWorkspacePythonSet = pyProjectPythonBase.overrideScope (
       lib.composeManyExtensions (
-        [ pyproject-build-systems.overlays.default ] ++ rosWorkspaceOverlays
+        [ pyproject-build-systems.overlays.default ]
+        ++ rosWorkspaceOverlays
+        ++ rosNativeOverlays  # Apply native dependency overrides from each package
       )
     );
 
@@ -393,10 +422,34 @@ EOF
       sourcePreference = "wheel";
     };
 
+    # Load native dependency overrides from webrtc package
+    webrtcNativeOverlay =
+      let
+        nativeDepsFile = workspaceSrcPath + "/webrtc/native-deps.nix";
+        hasNativeDeps = builtins.pathExists nativeDepsFile;
+      in
+        if hasNativeDeps then
+          let
+            nativeDepsMap = import nativeDepsFile;
+          in
+            (final: prev:
+              lib.attrsets.concatMapAttrs (pkgName: nixPkgNames:
+                lib.optionalAttrs (prev ? ${pkgName}) {
+                  ${pkgName} = prev.${pkgName}.overrideAttrs (old: {
+                    buildInputs = (old.buildInputs or []) ++ (map (n: pkgs.${n}) nixPkgNames);
+                    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.autoPatchelfHook ];
+                  });
+                }
+              ) nativeDepsMap
+            )
+        else
+          (final: prev: {});
+
     webrtcPythonSet = pyProjectPythonBase.overrideScope (
       lib.composeManyExtensions [
         pyproject-build-systems.overlays.default
         webrtcOverlay
+        webrtcNativeOverlay  # Apply native dependency overrides
       ]
     );
 
