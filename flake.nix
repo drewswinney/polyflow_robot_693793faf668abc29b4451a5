@@ -427,7 +427,8 @@ EOF
     });
 
     # Python environment with webrtc and all its dependencies (including uv2nix deps)
-    webrtcPythonEnv = pythonForPyproject.withPackages (ps:
+    # Use the Python from webrtcPythonSet to ensure uv2nix dependencies are available
+    webrtcPythonEnv = webrtcPythonSet.python.withPackages (ps:
       [ webrtcPkg ] ++ (webrtcPkg.propagatedBuildInputs or [])
     );
 
