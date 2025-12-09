@@ -211,6 +211,10 @@ let
       done
       set -u
 
+      echo "[DEBUG] AMENT_PREFIX_PATH=$AMENT_PREFIX_PATH" >&2
+      echo "[DEBUG] PYTHONPATH=$PYTHONPATH" >&2
+      echo "[DEBUG] RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION" >&2
+
       exec ros2 launch webrtc webrtc.launch.py
     '';
   };
