@@ -200,36 +200,30 @@
       )
     );
 
-    # For each ROS package with a pyproject.toml, build its Python dependencies using uv2nix
+    # For each ROS package with a uv.lock, extract all dependencies (including transitive)
     rosUvDeps = lib.mapAttrs (name: _:
       let
         pkgPath = "${workspaceSrcPath}/${name}";
-        hasPyproject = builtins.pathExists "${pkgPath}/pyproject.toml";
+        hasUvLock = builtins.pathExists "${pkgPath}/uv.lock";
       in
-        if hasPyproject then
+        if hasUvLock then
           let
-            workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = pkgPath; };
-            overlay = workspace.mkPyprojectOverlay { sourcePreference = "wheel"; };
-            pythonSet = pyProjectPythonBase.overrideScope (
-              lib.composeManyExtensions [
-                pyproject-build-systems.overlays.default
-                overlay
-              ]
-            );
-            # Get the list of dependency packages (excluding the package itself)
-            # Use tryEval to avoid errors from removed package aliases
-            allPkgNames = builtins.attrNames pythonSet;
-            depNames = builtins.filter (n:
-              n != name &&
-              (builtins.tryEval pythonSet.${n}).success && (
-                !(pyProjectPythonBase ? ${n}) || (
-                  (builtins.tryEval pyProjectPythonBase.${n}).success &&
-                  pythonSet.${n} != pyProjectPythonBase.${n}
-                )
-              )
-            ) allPkgNames;
+            # Read all package names from uv.lock
+            lockfile = builtins.fromTOML (builtins.readFile "${pkgPath}/uv.lock");
+            allPackages = lockfile.package or [];
+
+            # Extract package names, excluding the package itself
+            depNames = builtins.filter (n: n != name)
+              (builtins.map (pkg: pkg.name) allPackages);
+
+            # Safely try to get each dependency from the Python set
+            tryGetPkg = pkgName:
+              let
+                result = builtins.tryEval (rosWorkspacePythonSet.${pkgName} or null);
+              in
+                if result.success && result.value != null then [result.value] else [];
           in
-            builtins.map (dep: pythonSet.${dep}) depNames
+            builtins.concatMap tryGetPkg depNames
         else
           []
     ) rosPackageDirs;
