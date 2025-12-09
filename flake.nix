@@ -234,6 +234,13 @@
       let
         pkgPath = "${workspaceSrcPath}/${name}";
         hasUvLock = builtins.pathExists "${pkgPath}/uv.lock";
+
+        # Packages already provided by ROS or nixpkgs - exclude from uv2nix deps
+        commonPackages = [
+          "setuptools" "wheel" "pip"
+          "numpy" "pyyaml" "pillow"
+          "pytest" "pytest-cov" "coverage"
+        ];
       in
         if hasUvLock then
           let
@@ -241,8 +248,8 @@
             lockfile = builtins.fromTOML (builtins.readFile "${pkgPath}/uv.lock");
             allPackages = lockfile.package or [];
 
-            # Extract package names, excluding the package itself
-            depNames = builtins.filter (n: n != name)
+            # Extract package names, excluding the package itself and common packages
+            depNames = builtins.filter (n: n != name && !(builtins.elem n commonPackages))
               (builtins.map (pkg: pkg.name) allPackages);
 
             # Safely try to get each dependency from the Python set
@@ -456,12 +463,19 @@ EOF
     # Extract all uv2nix dependencies from webrtc/uv.lock (includes transitive deps)
     webrtcUvDeps =
       let
+        # Packages already provided by ROS or nixpkgs - exclude from uv2nix deps
+        commonPackages = [
+          "setuptools" "wheel" "pip"
+          "numpy" "pyyaml" "pillow"
+          "pytest" "pytest-cov" "coverage"
+        ];
+
         # Read all package names from uv.lock
         lockfile = builtins.fromTOML (builtins.readFile (workspaceSrcPath + "/webrtc/uv.lock"));
         allPackages = lockfile.package or [];
 
-        # Extract package names, excluding the webrtc package itself
-        depNames = builtins.filter (n: n != "webrtc")
+        # Extract package names, excluding the webrtc package itself and common packages
+        depNames = builtins.filter (n: n != "webrtc" && !(builtins.elem n commonPackages))
           (builtins.map (pkg: pkg.name) allPackages);
 
         # Safely try to get each dependency from the Python set
