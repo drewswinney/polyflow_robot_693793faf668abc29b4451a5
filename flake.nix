@@ -406,23 +406,29 @@ EOF
       ]
     );
 
-    # Extract uv2nix dependencies from webrtcPythonSet (similar to rosUvDeps)
+    # Dynamically extract uv2nix dependencies from webrtc/pyproject.toml
     webrtcUvDeps =
       let
-        # Safely try to get a package, returning empty list if it fails
+        # Read dependencies from pyproject.toml
+        pyproject = builtins.fromTOML (builtins.readFile (workspaceSrcPath + "/webrtc/pyproject.toml"));
+        rawDeps = pyproject.project.dependencies or [];
+
+        # Extract package name from dependency string (e.g., "aiortc<2.0.0,>=1.9.0" -> "aiortc")
+        extractPkgName = dep:
+          let
+            # Match package name at start of string (alphanumeric, underscore, hyphen)
+            parts = builtins.match "^([a-zA-Z0-9_-]+).*" dep;
+          in
+            if parts != null then builtins.head parts else dep;
+
+        depNames = builtins.map extractPkgName rawDeps;
+
+        # Safely try to get each dependency from the Python set
         tryGetPkg = name:
           let
-            result = builtins.tryEval (
-              if webrtcPythonSet ? ${name} then webrtcPythonSet.${name} else null
-            );
+            result = builtins.tryEval (webrtcPythonSet.${name} or null);
           in
             if result.success && result.value != null then [result.value] else [];
-
-        allPkgNames = builtins.attrNames webrtcPythonSet;
-        # Filter to packages that don't exist in base Python set
-        depNames = builtins.filter (n:
-          n != "webrtc" && !(pyProjectPythonBase ? ${n})
-        ) allPkgNames;
       in
         builtins.concatMap tryGetPkg depNames;
 
