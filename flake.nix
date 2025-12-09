@@ -449,16 +449,20 @@ EOF
     });
 
     # Python environment with webrtc and all its dependencies (including uv2nix deps)
-    # Use the Python from webrtcPythonSet to ensure uv2nix dependencies are available
-    webrtcPythonEnv = webrtcPythonSet.python.withPackages (ps:
-      [ webrtcPkg ] ++ (webrtcPkg.propagatedBuildInputs or [])
-    );
+    # Use buildEnv to combine packages from different Python sets (uv2nix + ROS)
+    webrtcPythonEnv = pkgs.buildEnv {
+      name = "webrtc-python-env";
+      paths = [ webrtcPkg ] ++ (webrtcPkg.propagatedBuildInputs or []);
+      pathsToLink = [ "/lib" ];
+    };
 
     # Python environment with rosWorkspace and all its dependencies
-    # Use the Python from rosWorkspacePythonSet to ensure uv2nix dependencies are available
-    rosWorkspacePythonEnv = rosWorkspacePythonSet.python.withPackages (ps:
-      [ rosWorkspace ] ++ (rosWorkspace.propagatedBuildInputs or [])
-    );
+    # Use buildEnv to combine packages from different Python sets (uv2nix + ROS)
+    rosWorkspacePythonEnv = pkgs.buildEnv {
+      name = "ros-workspace-python-env";
+      paths = [ rosWorkspace ] ++ (rosWorkspace.propagatedBuildInputs or []);
+      pathsToLink = [ "/lib" ];
+    };
   in
   {
     # Export packages
