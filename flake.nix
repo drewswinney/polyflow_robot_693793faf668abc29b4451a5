@@ -178,6 +178,28 @@
         ''polyflow-ros: found ROS dirs ${lib.concatStringsSep ", " (lib.attrNames filtered)} under ${workspaceSrcPath}''
         filtered;
 
+    # Create overlays for each ROS package with pyproject.toml
+    rosWorkspaceOverlays = lib.mapAttrsToList (name: _:
+      let
+        pkgPath = "${workspaceSrcPath}/${name}";
+        hasPyproject = builtins.pathExists "${pkgPath}/pyproject.toml";
+      in
+        if hasPyproject then
+          let
+            workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = pkgPath; };
+          in
+            workspace.mkPyprojectOverlay { sourcePreference = "wheel"; }
+        else
+          (final: prev: {})  # empty overlay for packages without pyproject.toml
+    ) rosPackageDirs;
+
+    # Create Python set with all ROS workspace dependencies
+    rosWorkspacePythonSet = pyProjectPythonBase.overrideScope (
+      lib.composeManyExtensions (
+        [ pyproject-build-systems.overlays.default ] ++ rosWorkspaceOverlays
+      )
+    );
+
     # For each ROS package with a pyproject.toml, build its Python dependencies using uv2nix
     rosUvDeps = lib.mapAttrs (name: _:
       let
@@ -433,7 +455,8 @@ EOF
     );
 
     # Python environment with rosWorkspace and all its dependencies
-    rosWorkspacePythonEnv = pythonForPyproject.withPackages (ps:
+    # Use the Python from rosWorkspacePythonSet to ensure uv2nix dependencies are available
+    rosWorkspacePythonEnv = rosWorkspacePythonSet.python.withPackages (ps:
       [ rosWorkspace ] ++ (rosWorkspace.propagatedBuildInputs or [])
     );
   in
