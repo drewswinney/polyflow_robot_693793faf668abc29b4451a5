@@ -1,0 +1,149 @@
+{
+  "nodes": {
+    "nix-ros-overlay": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764665924,
+        "narHash": "sha256-ncGeWPiK6BawJdDZc0ugfeG2yPIGAYsdOFwpXBZ193k=",
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "rev": "804d2ee3fd89898fb7b1a02952aa5682e9725ce4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "type": "github"
+      }
+    },
+    "nix-ros-workspace": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1749001346,
+        "narHash": "sha256-q2xrIUD+kgyxGXp6oi7QW0QzxL6PsOODRoj/ru9P9ig=",
+        "owner": "hacker1024",
+        "repo": "nix-ros-workspace",
+        "rev": "e341a5fd27af73be15bc0396c5745c54398193aa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hacker1024",
+        "repo": "nix-ros-workspace",
+        "type": "github"
+      }
+    },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1764440730,
+        "narHash": "sha256-ZlJTNLUKQRANlLDomuRWLBCH5792x+6XUJ4YdFRjtO4=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "9154f4569b6cdfd3c595851a6ba51bfaa472d9f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1744849697,
+        "narHash": "sha256-S9hqvanPSeRu6R4cw0OhvH1rJ+4/s9xIban9C4ocM/0=",
+        "owner": "lopsided98",
+        "repo": "nixpkgs",
+        "rev": "6318f538166fef9f5118d8d78b9b43a04bb049e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "ref": "nix-ros",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "pyproject-build-systems": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pyproject-nix": [
+          "pyproject-nix"
+        ],
+        "uv2nix": [
+          "uv2nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1763662255,
+        "narHash": "sha256-4bocaOyLa3AfiS8KrWjZQYu+IAta05u3gYZzZ6zXbT0=",
+        "owner": "pyproject-nix",
+        "repo": "build-system-pkgs",
+        "rev": "042904167604c681a090c07eb6967b4dd4dae88c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "build-system-pkgs",
+        "type": "github"
+      }
+    },
+    "pyproject-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1764134915,
+        "narHash": "sha256-xaKvtPx6YAnA3HQVp5LwyYG1MaN4LLehpQI8xEdBvBY=",
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "rev": "2c8df1383b32e5443c921f61224b198a2282a657",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nix-ros-overlay": "nix-ros-overlay",
+        "nix-ros-workspace": "nix-ros-workspace",
+        "nixos-hardware": "nixos-hardware",
+        "nixpkgs": "nixpkgs",
+        "pyproject-build-systems": "pyproject-build-systems",
+        "pyproject-nix": "pyproject-nix",
+        "uv2nix": "uv2nix"
+      }
+    },
+    "uv2nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pyproject-nix": [
+          "pyproject-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1764992234,
+        "narHash": "sha256-qBbyM1Gnvs/ncbnWfbBboMyevelz+owIdSN5Sg89wzw=",
+        "owner": "pyproject-nix",
+        "repo": "uv2nix",
+        "rev": "1610e554e579c3d47b47c8a32d47042116d0e153",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "uv2nix",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
