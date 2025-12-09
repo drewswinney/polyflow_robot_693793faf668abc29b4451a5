@@ -427,12 +427,12 @@ EOF
     });
 
     # Python environment with webrtc and all its dependencies (including uv2nix deps)
-    webrtcPythonEnv = pkgs.python3.withPackages (ps:
+    webrtcPythonEnv = pythonForPyproject.withPackages (ps:
       [ webrtcPkg ] ++ (webrtcPkg.propagatedBuildInputs or [])
     );
 
     # Python environment with rosWorkspace and all its dependencies
-    rosWorkspacePythonEnv = pkgs.python3.withPackages (ps:
+    rosWorkspacePythonEnv = pythonForPyproject.withPackages (ps:
       [ rosWorkspace ] ++ (rosWorkspace.propagatedBuildInputs or [])
     );
   in
