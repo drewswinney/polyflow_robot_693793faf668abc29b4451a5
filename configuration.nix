@@ -75,8 +75,8 @@ let
 
   pythonPath = lib.concatStringsSep ":" (lib.filter (p: p != "") [
     (lib.makeSearchPath rosPy.sitePackages rosRuntimePackages)
-    (lib.makeSearchPath pySitePackages [ webrtcPythonEnv ])
-    (lib.makeSearchPath pySitePackages [ rosWorkspacePythonEnv ])
+    "${webrtcPythonEnv}/${webrtcPythonEnv.sitePackages}"
+    "${rosWorkspacePythonEnv}/${rosWorkspacePythonEnv.sitePackages}"
   ]);
 
   amentRoots = rosRuntimePackages ++ [ webrtcPkg rosWorkspace ];
