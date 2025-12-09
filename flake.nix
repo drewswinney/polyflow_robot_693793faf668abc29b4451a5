@@ -406,14 +406,30 @@ EOF
       ]
     );
 
+    # Extract uv2nix dependencies from webrtcPythonSet (similar to rosUvDeps)
+    webrtcUvDeps =
+      let
+        allPkgNames = builtins.attrNames webrtcPythonSet;
+        depNames = builtins.filter (n:
+          n != "webrtc" &&
+          (builtins.tryEval webrtcPythonSet.${n}).success && (
+            !(pyProjectPythonBase ? ${n}) || (
+              (builtins.tryEval pyProjectPythonBase.${n}).success &&
+              webrtcPythonSet.${n} != pyProjectPythonBase.${n}
+            )
+          )
+        ) allPkgNames;
+      in
+        builtins.map (dep: webrtcPythonSet.${dep}) depNames;
+
     webrtcPkg = webrtcPythonSet.webrtc.overrideAttrs (old: {
       pname   = "webrtc";
       version = webrtcVersion;
       src     = webrtcSrc;
 
-      # ROS runtime deps + python extras
+      # ROS runtime deps + python extras + uv2nix deps
       propagatedBuildInputs =
-        (old.propagatedBuildInputs or [])
+        webrtcUvDeps
         ++ (with rosPkgs; [
           rclpy
           launch
