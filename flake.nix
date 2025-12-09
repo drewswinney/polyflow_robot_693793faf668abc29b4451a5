@@ -413,7 +413,7 @@ EOF
 
         # Resource marker, if present
         if [ -f ${webrtcSrc}/resource/webrtc ]; then
-          install -Dm644 ${webrtcSrc}/resource/webrtc $out/share/webrtc/resource
+          install -Dm644 ${webrtcSrc}/resource/webrtc $out/share/webrtc/resource/webrtc
         fi
 
         # 3: libexec shim so launch_ros finds the executable under lib/webrtc/webrtc_node
