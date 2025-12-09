@@ -196,7 +196,17 @@
     # Create Python set with all ROS workspace dependencies
     rosWorkspacePythonSet = pyProjectPythonBase.overrideScope (
       lib.composeManyExtensions (
-        [ pyproject-build-systems.overlays.default ] ++ rosWorkspaceOverlays
+        [ pyproject-build-systems.overlays.default ]
+        ++ rosWorkspaceOverlays
+        ++ [
+          # Override odrive to add libusb dependency for native library
+          (final: prev: lib.optionalAttrs (prev ? odrive) {
+            odrive = prev.odrive.overrideAttrs (old: {
+              buildInputs = (old.buildInputs or []) ++ [ pkgs.libusb1 ];
+              nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.autoPatchelfHook ];
+            });
+          })
+        ]
       )
     );
 
@@ -397,6 +407,13 @@ EOF
       lib.composeManyExtensions [
         pyproject-build-systems.overlays.default
         webrtcOverlay
+        # Override odrive to add libusb dependency for native library
+        (final: prev: lib.optionalAttrs (prev ? odrive) {
+          odrive = prev.odrive.overrideAttrs (old: {
+            buildInputs = (old.buildInputs or []) ++ [ pkgs.libusb1 ];
+            nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.autoPatchelfHook ];
+          });
+        })
       ]
     );
 
