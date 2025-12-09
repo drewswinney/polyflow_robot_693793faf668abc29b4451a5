@@ -196,6 +196,10 @@ let
       export AMENT_PREFIX_PATH
       export LD_LIBRARY_PATH
 
+      echo PYTHONPATH
+      echo AMENT_PREFIX_PATH
+      echo LD_LIBRARY_PATH
+
       # Local setup scripts expect AMENT_TRACE_SETUP_FILES to be unset when absent.
       set +u
       for prefix in ${webrtcRuntimePrefixes}; do
