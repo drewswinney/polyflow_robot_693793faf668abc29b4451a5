@@ -75,6 +75,7 @@ let
 
   pythonPath = lib.concatStringsSep ":" (lib.filter (p: p != "") [
     (lib.makeSearchPath rosPy.sitePackages rosRuntimePackages)
+    (lib.makeSearchPath rosPy.sitePackages [ webrtcPkg ])
     "${webrtcPythonEnv}/${webrtcPythonEnv.sitePackages}"
     "${rosWorkspacePythonEnv}/${rosWorkspacePythonEnv.sitePackages}"
   ]);
