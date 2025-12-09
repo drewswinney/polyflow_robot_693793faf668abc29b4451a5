@@ -406,22 +406,16 @@ EOF
       ]
     );
 
-    # Dynamically extract uv2nix dependencies from webrtc/pyproject.toml
+    # Extract all uv2nix dependencies from webrtc/uv.lock (includes transitive deps)
     webrtcUvDeps =
       let
-        # Read dependencies from pyproject.toml
-        pyproject = builtins.fromTOML (builtins.readFile (workspaceSrcPath + "/webrtc/pyproject.toml"));
-        rawDeps = pyproject.project.dependencies or [];
+        # Read all package names from uv.lock
+        lockfile = builtins.fromTOML (builtins.readFile (workspaceSrcPath + "/webrtc/uv.lock"));
+        allPackages = lockfile.package or [];
 
-        # Extract package name from dependency string (e.g., "aiortc<2.0.0,>=1.9.0" -> "aiortc")
-        extractPkgName = dep:
-          let
-            # Match package name at start of string (alphanumeric, underscore, hyphen)
-            parts = builtins.match "^([a-zA-Z0-9_-]+).*" dep;
-          in
-            if parts != null then builtins.head parts else dep;
-
-        depNames = builtins.map extractPkgName rawDeps;
+        # Extract package names, excluding the webrtc package itself
+        depNames = builtins.filter (n: n != "webrtc")
+          (builtins.map (pkg: pkg.name) allPackages);
 
         # Safely try to get each dependency from the Python set
         tryGetPkg = name:
