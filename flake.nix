@@ -239,7 +239,7 @@
         commonPackages = [
           "setuptools" "wheel" "pip"
           "numpy" "pyyaml" "pillow"
-          "pytest" "pytest-cov" "coverage" "zipp"
+          "pytest" "pytest-cov" "coverage" "zipp" "importlib_metadata"
         ];
       in
         if hasUvLock then
